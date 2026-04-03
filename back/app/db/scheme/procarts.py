@@ -4,23 +4,21 @@ from typing import Optional
 
 from products import PrRead
 
-class OrDeBase(BaseModel):
+class PrCartBase(BaseModel):
     qty:int=Field(..., ge=0, le=99)
-    price:int=Field(..., ge=0)
 
-class OrDeCreate(OrDeBase):
+class PrCartCreate(PrCartBase):
     pro_id:int
     cart_id:int
 
-class OrDeUpdate(OrDeBase):
+class PrCartUpdate(PrCartBase):
     qty:Optional[int]=Field(None, ge=0, le=99)
-    price:Optional[int]=Field(None, ge=0)
-
-class OrDeInDB(OrDeBase):
-    od_id: int
+    
+class PrCartInDB(PrCartBase):
+    pro_cart_id: int
     
     class Config:
         from_attributes = True
 
-class OrDeRead(OrDeInDB):
+class PrCartRead(PrCartInDB):
     product: PrRead

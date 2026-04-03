@@ -10,7 +10,7 @@ from typing import Optional, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .users import User
     from .orderdetails import OrderDetail
-    from .reviews import Review
+
 
 
 class Order(Base):
@@ -26,7 +26,7 @@ class Order(Base):
     
     user: Mapped["User"] = relationship(back_populates="orders")
     orderdetails: Mapped[List["OrderDetail"]] = relationship(back_populates="order", cascade="all, delete-orphan")
-    review: Mapped[Optional["Review"]] = relationship(back_populates="orderdetail", uselist=False)
+    
     
     
     
