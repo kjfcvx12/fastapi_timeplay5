@@ -6,9 +6,9 @@ from sqlalchemy import String, ForeignKey
 from typing import TYPE_CHECKING 
 
 if TYPE_CHECKING:
-    from .user import User
-    from .product import Product
-    from .orderdetail import OrderDetail
+    from .users import User
+    from .products import Product
+    from .orderdetails import OrderDetail
 
 class Review(Base):
     __tablename__="reviews"

@@ -7,9 +7,9 @@ from typing import List, TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from .procart import ProCart
-    from .orderdetail import OrderDetail
-    from .review import Review
+    from .procarts import ProCart
+    from .orderdetails import OrderDetail
+    from .reviews import Review
 
 class Product(Base):
     __tablename__="products"

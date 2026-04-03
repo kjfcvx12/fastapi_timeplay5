@@ -6,8 +6,8 @@ from sqlalchemy import ForeignKey
 from typing import TYPE_CHECKING 
 
 if TYPE_CHECKING:
-    from .product import Product
-    from .cart import Cart
+    from .products import Product
+    from .carts import Cart
 
 class ProCart(Base):
     __tablename__="procarts"

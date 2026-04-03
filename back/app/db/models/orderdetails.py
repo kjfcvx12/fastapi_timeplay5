@@ -6,8 +6,8 @@ from sqlalchemy import ForeignKey
 from typing import TYPE_CHECKING 
 
 if TYPE_CHECKING:
-    from .order import Order
-    from .product import Product
+    from .orders import Order
+    from .products import Product
 
 class OrderDetail(Base):
     __tablename__="orderdetails"

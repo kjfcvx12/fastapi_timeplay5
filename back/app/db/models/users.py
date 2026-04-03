@@ -8,9 +8,9 @@ from datetime import datetime
 from typing import Optional, List, TYPE_CHECKING 
 
 if TYPE_CHECKING:
-    from .cart import Cart
-    from .order import Order
-    from .review import Review
+    from .carts import Cart
+    from .orders import Order
+    from .reviews import Review
 
 
 class User(Base):
