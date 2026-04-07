@@ -33,7 +33,7 @@ class ProService:
 
 
     @staticmethod
-    async def se_pr_get_name(db:AsyncSession, pro_name:int)-> list[Product]:
+    async def se_pr_get_name(db:AsyncSession, pro_name:str)-> list[Product]:
         db_pro=await PrCrud.cr_pr_get_by_name(db, pro_name)
 
         if not db_pro:
@@ -44,44 +44,66 @@ class ProService:
 
 
     @staticmethod
-    async def se_pr_create(db:AsyncSession, product:PrCreate) ->Product:
-        try:
-            if User.role!='admin':
-                raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="관리자 권한이 필요합니다."
-            )
-            
+    async def se_pr_create(db:AsyncSession, product:PrCreate, user: User) ->Product:
+       
+        if user.role!='admin':
+            raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="관리자 권한이 필요합니다.")
+
+        try:    
             db_pro=await PrCrud.cr_pr_create(db, product)
             await db.commit()
             await db.refresh(db_pro)
             return db_pro
 
-        except Exception:
+        except Exception as e:
             await db.rollback()
-            raise
+            raise HTTPException(status_code=500, detail=str(e))
 
 
     @staticmethod
     async def se_pr_update(db:AsyncSession, product:PrUpdate, 
-                           pro_id:int)-> Product:
-        db_pro=await PrCrud.cr_pr_update_by_id(db, product, pro_id)
+                           pro_id:int, user: User)-> Product:
+        if user.role!='admin':
+            raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="관리자 권한이 필요합니다.")
+
+        try:
+            db_pro=await PrCrud.cr_pr_update_by_id(db, product, pro_id)
+            
+            if not db_pro:
+                raise HTTPException(status_code=404, 
+                                    detail="찾으시는 id의 상품이 없습니다.")
+            
+            await db.commit()
+            await db.refresh(db_pro)
+            return db_pro
         
-        if not db_pro:
-            raise HTTPException(status_code=404, 
-                                detail="찾으시는 id의 상품이 없습니다.")
-        
-        await db.commit()
-        await db.refresh(db_pro)
-        return db_pro
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+
     
     @staticmethod
-    async def se_pr_delete(db:AsyncSession, pro_id:int)-> Product:
-        db_pro=await PrCrud.cr_pr_delete_by_id(db, pro_id)
+    async def se_pr_delete(db:AsyncSession, pro_id:int, 
+                           user: User)-> Product:
+        if user.role!='admin':
+            raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="관리자 권한이 필요합니다.")
+
+        try:
+            db_pro=await PrCrud.cr_pr_delete_by_id(db, pro_id)
+            
+            if not db_pro:
+                raise HTTPException(status_code=404, 
+                                    detail="찾으시는 id의 상품이 없습니다.")
+            
+            await db.commit()
+            return db_pro
         
-        if not db_pro:
-            raise HTTPException(status_code=404, 
-                                detail="찾으시는 id의 상품이 없습니다.")
-        
-        await db.commit()
-        return db_pro
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))

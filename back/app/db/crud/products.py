@@ -28,9 +28,6 @@ class PrCrud:
 
     @staticmethod
     async def cr_pr_create(db:AsyncSession, product:PrCreate) -> Product:
-        if User.role!="admin":
-            return None
-        
         new_product=Product(**product.model_dump())
         db.add(new_product)
         await db.flush()
@@ -39,10 +36,7 @@ class PrCrud:
 
     @staticmethod
     async def cr_pr_update_by_id(db:AsyncSession, product:PrUpdate, 
-                                 pro_id:int) -> Product | None:
-        if User.role!="admin":
-            return None
-        
+                                 pro_id:int) -> Product | None:        
         db_pro=await db.get(Product, pro_id)
         if db_pro:
             update_data=product.model_dump(exclude_unset=True)
@@ -57,9 +51,6 @@ class PrCrud:
 
     @staticmethod
     async def cr_pr_delete_by_id(db: AsyncSession, pro_id: int) -> Product | None:
-        if User.role!="admin":
-            return None
-
         db_pro = await db.get(Product, pro_id)
         if db_pro:
             await db.delete(db_pro)

@@ -9,8 +9,9 @@ class OrBase(BaseModel):
     order_state: int=Field(..., ge=0, le=4)
     user_id:int=Field(...)
 
-class OrCreate(OrBase):
-    pass
+class OrCreate(BaseModel):
+    user_id: int
+    pay: int
 
 
 class OrInDB(OrBase):
