@@ -7,7 +7,7 @@ from fastapi.concurrency import asynccontextmanager
 from dotenv import load_dotenv
 
 from app.db.database import Base, async_engine
-from app.routers import products, users
+from app.routers import products
 from app.middleware.token_refresh import RefreshTokenMiddleware
 
 load_dotenv(dotenv_path=".env")
