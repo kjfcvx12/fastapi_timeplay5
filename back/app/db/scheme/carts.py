@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 
-from procarts import PrCartRead
+from app.db.scheme.procarts import PrCartRead
 
 class CaBase(BaseModel):
     user_id:int=Field(...)

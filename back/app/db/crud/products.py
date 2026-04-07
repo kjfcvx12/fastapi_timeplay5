@@ -4,6 +4,8 @@ from sqlalchemy.future import select
 from app.db.models.products import Product
 from app.db.scheme.products import PrCreate, PrUpdate
 
+from app.db.models.users import User
+
 
 class PrCrud:
 
@@ -25,8 +27,8 @@ class PrCrud:
     
 
     @staticmethod
-    async def cr_pr_create(db:AsyncSession, product:PrCreate, role:str) -> Product:
-        if role!="admin":
+    async def cr_pr_create(db:AsyncSession, product:PrCreate) -> Product:
+        if User.role!="admin":
             return None
         
         new_product=Product(**product.model_dump())
@@ -37,8 +39,8 @@ class PrCrud:
 
     @staticmethod
     async def cr_pr_update_by_id(db:AsyncSession, product:PrUpdate, 
-                                 pro_id:int, role:str) -> Product | None:
-        if role!="admin":
+                                 pro_id:int) -> Product | None:
+        if User.role!="admin":
             return None
         
         db_pro=await db.get(Product, pro_id)
@@ -54,8 +56,8 @@ class PrCrud:
         
 
     @staticmethod
-    async def cr_pr_delete_by_id(db: AsyncSession, pro_id: int, role:str) -> Product | None:
-        if role!="admin":
+    async def cr_pr_delete_by_id(db: AsyncSession, pro_id: int) -> Product | None:
+        if User.role!="admin":
             return None
 
         db_pro = await db.get(Product, pro_id)

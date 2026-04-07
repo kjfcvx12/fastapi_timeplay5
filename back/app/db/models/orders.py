@@ -22,7 +22,7 @@ class Order(Base):
     pay: Mapped[int] =mapped_column(nullable=False)
     order_state: Mapped[int] =mapped_column(nullable=False, default=0)
     
-    user_id: Mapped[int]= mapped_column(ForeignKey("users.user_id"), nullable=False)
+    user_id: Mapped[int]= mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     
     user: Mapped["User"] = relationship(back_populates="orders")
     orderdetails: Mapped[List["OrderDetail"]] = relationship(back_populates="order", cascade="all, delete-orphan")

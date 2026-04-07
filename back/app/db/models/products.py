@@ -5,7 +5,6 @@ from sqlalchemy import String
 
 from typing import List, TYPE_CHECKING 
 
-
 if TYPE_CHECKING:
     from .procarts import ProCart
     from .orderdetails import OrderDetail

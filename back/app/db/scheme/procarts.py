@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from typing import Optional
 
-from products import PrRead
+from app.db.scheme.products import PrRead
 
 class PrCartBase(BaseModel):
     qty:int=Field(..., ge=0, le=99)

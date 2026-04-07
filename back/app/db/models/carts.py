@@ -14,7 +14,7 @@ class Cart(Base):
 
     cart_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     
-    user_id: Mapped[int]= mapped_column(ForeignKey("users.user_id"), nullable=False, unique=True)
+    user_id: Mapped[int]= mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False, unique=True)
     
     
     user: Mapped["User"] = relationship(back_populates="cart")

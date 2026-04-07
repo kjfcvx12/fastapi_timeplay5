@@ -12,10 +12,6 @@ class OrDeCreate(OrDeBase):
     pro_id:int
     cart_id:int
 
-class OrDeUpdate(OrDeBase):
-    qty:Optional[int]=Field(None, ge=0, le=99)
-    price:Optional[int]=Field(None, ge=0)
-
 class OrDeInDB(OrDeBase):
     od_id: int
     

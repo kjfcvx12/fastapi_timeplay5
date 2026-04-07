@@ -12,10 +12,6 @@ class OrBase(BaseModel):
 class OrCreate(OrBase):
     pass
 
-class OrUpdate(BaseModel):
-    total : int=Field(..., ge=0)
-    pay : int=Field(..., ge=0, le=1)
-    order_state: int=Field(..., ge=0, le=4)
 
 class OrInDB(OrBase):
     order_id:int

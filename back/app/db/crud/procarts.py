@@ -15,12 +15,12 @@ class PrCartCrud:
 
 
     @staticmethod
-    async def cr_prcart_update_by_id(db:AsyncSession, product:PrCartUpdate, 
+    async def cr_prcart_update_by_id(db:AsyncSession, prcart:PrCartUpdate, 
                                      pro_cart_id:int) -> ProCart | None:
         
         prcart_data=await db.get(ProCart, pro_cart_id)
         if prcart_data:
-            update_data=product.model_dump(exclude_unset=True)
+            update_data=prcart.model_dump(exclude_unset=True)
             for key, Value in update_data.items():
                 setattr(prcart_data,key, Value)
             await db.flush()
