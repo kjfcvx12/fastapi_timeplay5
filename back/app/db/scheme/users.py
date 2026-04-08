@@ -23,7 +23,7 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     email: str | None = None
     user_name: str | None = None
-    pw: str | None = None
+    pw: Annotated[str, Field(max_length=72, default=None)] 
     address: str | None = None
     phone: str | None = None
 
