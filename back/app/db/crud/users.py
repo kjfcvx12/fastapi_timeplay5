@@ -14,6 +14,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+#jwt_handle 으로 분리
 
 class UserAuth:
     @staticmethod
@@ -31,6 +32,7 @@ class UserAuth:
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+# UserAuth는 jwt_handle 쪽으로 분리
 
 class UserCrud:
     @staticmethod
@@ -49,17 +51,20 @@ class UserCrud:
             "user": user
         }
 
+    # 로그인 services 쪽 이동
+
     @staticmethod
     async def cr_us_create(db:AsyncSession, user: UserCreate) -> User:
         hashed_pw = UserAuth.cr_us_get_password_hash(user.pw)
         
         user_data = user.model_dump()
         user_data["pw"] = hashed_pw
-        
+        # 비밀번호 암호화 service 쪽 이동
         db_user=User(**user_data)
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
+        # commit & refresh 제거 후 flush 교체
         return db_user
 
     @staticmethod
@@ -71,11 +76,12 @@ class UserCrud:
             for key,value in update_data.items():
                 if key == "pw":
                     value = UserAuth.cr_us_get_password_hash(value)
-                
+                # key 조건은 service 쪽으로
                 setattr(db_user,key,value)
             await db.flush()
             await db.commit()
             await db.refresh(db_user)
+            # commit&refresh 제거
             return db_user
             
         return None
@@ -95,6 +101,8 @@ class UserCrud:
             return True
         
         return False
+    
+    # services 쪽 이동
 
     @staticmethod
     async def cr_us_delete(db:AsyncSession , user_id:int)->User|None:
@@ -102,6 +110,7 @@ class UserCrud:
         if db_user:
             await db.delete(db_user)
             await db.commit()
+            # commit 말고 flush
             return db_user
         return None
  
