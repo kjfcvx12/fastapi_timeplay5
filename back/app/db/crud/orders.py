@@ -5,7 +5,7 @@ from app.db.models.products import Product
 from app.db.models.orders import Order
 from app.db.models.orderdetails import OrderDetail
 
-from app.db.scheme.orders import OrCreate, OrRead
+from app.db.scheme.orders import OrCreate, OrRead, OrUpdate
 
 
 
@@ -18,11 +18,19 @@ class OrderCrud:
         return result.scalars().all()
 
     @staticmethod
-    async def cr_or_update_pro(db: AsyncSession, pro_id: int, pro_qty: int):
-        result = await db.execute(select(Product).filter(Product.pro_id == pro_id))
-        product = result.scalar_one_or_none()
-        if product and product.qty >= pro_qty:
-            product.qty -= pro_qty
+    async def cr_or_update_state(db:AsyncSession, order_id:int, order_state:int) -> Order:
+        db_order=await db.execute(select(OrderDetail).filter(order_id==OrderDetail.order_id))
+
+
+    async def cr_or_update_by_id(db:AsyncSession, order:OrUpdate, 
+                                 order_id:int) -> Order | None:        
+        db_order=await db.get(Order, order_id)
+        if db_order:
+            update_data=Order.model_dump(exclude_unset=True)
+            for key, Value in update_data.items():
+                setattr(db_order,key, Value)
             await db.flush()
-            return True
-        return False
+
+            return db_order
+            
+        return None

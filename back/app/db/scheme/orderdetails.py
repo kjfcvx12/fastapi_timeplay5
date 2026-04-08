@@ -13,6 +13,7 @@ class OrDeCreate(OrDeBase):
     cart_id:int
     price: int
 
+
 class OrDeInDB(OrDeBase):
     od_id: int
     

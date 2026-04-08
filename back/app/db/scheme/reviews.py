@@ -7,6 +7,7 @@ class ReviewBase(BaseModel):
     content : str
     rating : int = Field(ge=0, le=5)
     pro_id : int
+    user_id : int
     od_id : int
 
 #리뷰 작성
@@ -20,9 +21,9 @@ class ReviewUpdate(BaseModel):
 
 #DB에 저장
 class ReviewInDB(ReviewBase):
-    user_id : int
     rev_id : int
     created_at : datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    #테이블에 날짜 없음
 
     class Config:
         from_attributes = True

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 from orderdetails import OrDeRead
 
@@ -13,6 +13,8 @@ class OrCreate(BaseModel):
     user_id: int
     pay: int
 
+class OrUpdate(BaseModel):
+    order_state: Optional[int]=Field(None, ge=0, le=4)
 
 class OrInDB(OrBase):
     order_id:int

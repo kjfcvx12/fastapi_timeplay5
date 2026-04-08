@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
 
-from app.db.scheme.procarts import PrCartRead
 
 class CaBase(BaseModel):
     user_id:int=Field(...)
@@ -16,4 +14,4 @@ class CaInDB(CaBase):
         from_attributes=True
 
 class CaRead(CaInDB):
-     products: List[PrCartRead] = [] 
+    pass

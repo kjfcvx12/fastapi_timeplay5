@@ -1,14 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from fastapi import HTTPException,status
+from fastapi import HTTPException
 
 from app.db.crud.products import PrCrud
-
 from app.db.models.products import Product
-from app.db.scheme.products import PrCreate, PrRead, PrUpdate
-
-
-from app.db.models.users import User
+from app.db.scheme.products import PrCreate, PrUpdate
 
 class ProService:
 
@@ -44,13 +39,7 @@ class ProService:
 
 
     @staticmethod
-    async def se_pr_create(db:AsyncSession, product:PrCreate, user: User) ->Product:
-       
-        if user.role!='admin':
-            raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="관리자 권한이 필요합니다.")
-
+    async def se_pr_create(db:AsyncSession, product:PrCreate) ->Product:
         try:    
             db_pro=await PrCrud.cr_pr_create(db, product)
             await db.commit()
@@ -59,17 +48,12 @@ class ProService:
 
         except Exception as e:
             await db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, 
+                                detail=f"상품 등록 실패: {str(e)}")
 
 
     @staticmethod
-    async def se_pr_update(db:AsyncSession, product:PrUpdate, 
-                           pro_id:int, user: User)-> Product:
-        if user.role!='admin':
-            raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="관리자 권한이 필요합니다.")
-
+    async def se_pr_update(db:AsyncSession, product:PrUpdate, pro_id:int)-> Product:
         try:
             db_pro=await PrCrud.cr_pr_update_by_id(db, product, pro_id)
             
@@ -83,17 +67,12 @@ class ProService:
         
         except Exception as e:
             await db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, 
+                                detail=f"상품 수정 실패: {str(e)}")
 
     
     @staticmethod
-    async def se_pr_delete(db:AsyncSession, pro_id:int, 
-                           user: User)-> Product:
-        if user.role!='admin':
-            raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="관리자 권한이 필요합니다.")
-
+    async def se_pr_delete(db:AsyncSession, pro_id:int)-> Product:
         try:
             db_pro=await PrCrud.cr_pr_delete_by_id(db, pro_id)
             
@@ -106,4 +85,5 @@ class ProService:
         
         except Exception as e:
             await db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, 
+                                detail=f"상품 삭제 실패: {str(e)}")
