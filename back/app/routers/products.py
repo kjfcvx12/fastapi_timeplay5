@@ -28,7 +28,7 @@ async def ro_pr_get_name(pro_name:str, db:AsyncSession=Depends(get_db)):
 # 상품 등록
 @router.post("", response_model=PrRead, status_code=status.HTTP_201_CREATED)
 async def ro_pr_create(product:PrCreate,
-                       user_id:int=Depends(get_admin_id),
+                       admin_id:int=Depends(get_admin_id),
                        db:AsyncSession=Depends(get_db)):
     return await ProService.se_pr_create(db, product)
 
@@ -36,13 +36,13 @@ async def ro_pr_create(product:PrCreate,
 @router.put("/{pro_id}", response_model=PrRead, status_code=status.HTTP_200_OK)
 async def ro_pr_update(product:PrUpdate,
                        pro_id:int,
-                       user_id:int=Depends(get_admin_id),
+                       admin_id:int=Depends(get_admin_id),
                        db:AsyncSession=Depends(get_db)):
     return await ProService.se_pr_update(db, product, pro_id)
 
 # 상품 삭제
 @router.delete("/{pro_id}", response_model=PrRead, status_code=status.HTTP_200_OK)
 async def ro_pr_delete(pro_id:int,
-                       user_id:int=Depends(get_admin_id),
+                       admin_id:int=Depends(get_admin_id),
                        db:AsyncSession=Depends(get_db)):
     return await ProService.se_pr_delete(db, pro_id)

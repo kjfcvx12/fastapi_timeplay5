@@ -6,7 +6,6 @@ from app.db.scheme.users import UserCreate, UserUpdate, UserLogin
 from passlib.context import CryptContext
 from typing import Optional
 from datetime import datetime,timedelta,timezone
-from app.core.jwt_handle import UserAuth
 
 
 class UserCrud:
