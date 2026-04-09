@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from app.db.models.procarts import ProCart
 from app.db.models.products import Product
-from app.db.models.users import Cart
+from app.db.models.carts import Cart
 
 from app.db.scheme.procarts import PrCartCreate, PrCartUpdate
 
@@ -37,19 +37,17 @@ class PrCartCrud:
 
     @staticmethod
     async def cr_prcart_get_name(db:AsyncSession, cart_id:int, pro_name:str) -> list[ProCart]:
-        ids=await db.execute(select(Product.pro_id).filter(Product.pro_name.contains(pro_name)))
-        pro_ids=ids.scalars().all()
+        query = (select(ProCart).join(Product).filter(
+            ProCart.cart_id == cart_id,
+            Product.pro_name.contains(pro_name)))
+        
+        result = await db.execute(query)
 
-        if not pro_ids:
-            return []
-
-        result=await db.execute(select(ProCart).filter(ProCart.cart_id == cart_id,
-                                                       ProCart.pro_id.in_(pro_ids)))
         return result.scalars().all()
 
 
     @staticmethod
-    async def cr_prcart_get_id_pro_id(db:AsyncSession, pro_id:int, cart_id:int) ->  Optional[ProCart]:
+    async def cr_prcart_get_pro_id(db:AsyncSession, pro_id:int, cart_id:int) ->  Optional[ProCart]:
         db_prcart = select(ProCart).filter(
             ProCart.pro_id == pro_id,
             ProCart.cart_id == cart_id)
@@ -59,10 +57,10 @@ class PrCartCrud:
         return result.scalars().one_or_none()
     
     @staticmethod
-    async def cr_prcart_update_qty(db: AsyncSession, pro_cart_id: int, prcart: PrCartUpdate) -> ProCart:
+    async def cr_prcart_update_qty(db: AsyncSession, pro_cart_id: int, qty: int) -> ProCart:
         db_prcart = await db.get(ProCart, pro_cart_id)
         if db_prcart:
-            db_prcart.qty = prcart.qty
+            db_prcart.qty = qty
             await db.flush()
         return db_prcart
     
@@ -103,13 +101,12 @@ class PrCartCrud:
 
 
     @staticmethod
-    async def cr_cart_delete_by_id(db: AsyncSession, cart_id: int) -> ProCart | None:
-        db_prcart = await db.get(ProCart, cart_id)
-        if db_prcart:
-            await db.delete(db_prcart)
-            await db.flush()
+    async def cr_prcart_delete_all(db: AsyncSession, cart_id: int) -> int:
+        db_prcart = delete(ProCart).where(ProCart.cart_id == cart_id)
 
-            return db_prcart
-            
-        return None
+        result =await db.execute(db_prcart)
+        await db.flush()
+
+        return result.rowcount
+
     

@@ -1,5 +1,3 @@
-import uvicorn
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import asynccontextmanager
@@ -7,7 +5,7 @@ from fastapi.concurrency import asynccontextmanager
 from dotenv import load_dotenv
 
 from app.db.database import Base, async_engine
-from app.routers import products
+from app.routers import products, users
 from app.middleware.token_refresh import RefreshTokenMiddleware
 
 load_dotenv(dotenv_path=".env")
@@ -32,8 +30,6 @@ app.include_router(products.router)
 # app.include_router(review.router)
 
 
-if __name__=="__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8081, reload=True)
 
 
 #(C:\Users\hi\miniconda3\shell\condabin\conda-hook.ps1) ; (conda activate base)
