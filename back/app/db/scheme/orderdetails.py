@@ -10,7 +10,6 @@ class OrDeBase(BaseModel):
 
 class OrDeCreate(OrDeBase):
     pro_id:int
-    cart_id:int
     price: int
 
 

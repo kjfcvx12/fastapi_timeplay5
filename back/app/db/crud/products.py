@@ -45,6 +45,19 @@ class PrCrud:
             return db_pro
             
         return None
+  
+    @staticmethod
+    async def cr_pr_update_qty(db: AsyncSession, pro_id: int, eqty: int) -> Product | None:
+        db_pro = await db.get(Product, pro_id)
+        
+        if db_pro:
+            db_pro.qty = Product.qty - eqty 
+            
+            await db.flush()
+            return db_pro
+            
+        return None
+    
         
 
     @staticmethod
