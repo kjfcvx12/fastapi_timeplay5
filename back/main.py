@@ -1,5 +1,3 @@
-import uvicorn
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import asynccontextmanager
@@ -32,8 +30,6 @@ app.include_router(products.router)
 app.include_router(reviews.router)
 
 
-if __name__=="__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8081, reload=True)
 
 
 #(C:\Users\hi\miniconda3\shell\condabin\conda-hook.ps1) ; (conda activate base)

@@ -4,8 +4,6 @@ from sqlalchemy.future import select
 from app.db.models.products import Product
 from app.db.scheme.products import PrCreate, PrUpdate
 
-from app.db.models.users import User
-
 
 class PrCrud:
 
@@ -16,7 +14,7 @@ class PrCrud:
     
 
     @staticmethod
-    async def cr_pr_get_by_id(db:AsyncSession, pro_id:int) -> Product:
+    async def cr_pr_get_by_id(db:AsyncSession, pro_id:int) -> Product | None:
         return await db.get(Product, pro_id)
     
 
@@ -59,3 +57,4 @@ class PrCrud:
             return db_pro
             
         return None
+        

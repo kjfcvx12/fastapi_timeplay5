@@ -12,12 +12,9 @@ class CaCrud:
         db.add(new_cart)
         await db.flush()
         return new_cart
+   
     
 
-    @staticmethod
-    async def cr_ca_delete(db: AsyncSession) -> Cart | None:
-        await db.execute(delete(Cart))
-        await db.flush()
-        return True
+    
 
     

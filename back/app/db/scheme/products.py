@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 
-from typing import Optional
 
 class PrBase(BaseModel):
     pro_name : str
@@ -11,9 +10,9 @@ class PrCreate(PrBase):
     pass
 
 class PrUpdate(BaseModel):
-    pro_name : str | None=None
-    qty : Optional[int]=Field(None, ge=0)
-    price : Optional[int]=Field(None, ge=0)
+    pro_name: str | None = None
+    qty: int | None = Field(None, ge=0)
+    price: int | None = Field(None, ge=0)
 
 class PrInDB(PrBase):
     pro_id: int
