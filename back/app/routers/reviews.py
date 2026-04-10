@@ -43,11 +43,7 @@ async def ro_re_delete(
 #rev_id
 @router.get("/{rev_id}", response_model=ReviewRead)
 async def ro_re_get_rev_id(rev_id:int, db:AsyncSession=Depends(get_db)):
-    db_review=await ReviewCrud.cr_re_get_rev_id(db, rev_id)
-    
-    if not db_review:
-        raise HTTPException(status_code=404, detail="리뷰를 찾을 수 없습니다")
-    return db_review
+    return await ReviewCrud.cr_re_get_rev_id(db, rev_id)
 
 #pro_id 모든 리뷰
 @router.get("/product/{pro_id}", response_model=List[ReviewRead])
