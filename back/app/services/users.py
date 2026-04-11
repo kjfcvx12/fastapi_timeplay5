@@ -7,14 +7,20 @@ from app.core.jwt_handle import get_password_hash, verify_password, create_acces
 class UserService:
     @staticmethod
     async def se_us_create(db:AsyncSession, user:UserCreate):
+        already_user=await UserCrud.cr_us_get_by_email(db, user.email)
+
+        if already_user:
+            raise HTTPException(status_code=400, detail='이미 등록된 이메일 입니다.')
+        # 동일한 이메일을 가진 유저가 있을 경우 접속을 막기위한 에러처리(완료)
+        
         hashed_pw = get_password_hash(user.pw)
         new_user = await UserCrud.cr_us_create(db, user, hashed_pw)
         await db.commit()
         await db.refresh(new_user)
         return new_user
     
-    # se_us_create
-    # 동일한 이메일을 가진 유저가 있을 경우 접속을 막기위한 에러처리
+    
+    
     
     @staticmethod
     async def se_us_login(db: AsyncSession, login_data: UserLogin):
@@ -40,50 +46,57 @@ class UserService:
     @staticmethod
     async def se_us_update(db:AsyncSession,user_id:int, user_update:UserUpdate):
         update_data=user_update.model_dump(exclude_unset=True)
-
         
-        if "pw" in update_data and update_data["pw"] is not None:
-            update_data["pw"] = get_password_hash(update_data["pw"])
+        if update_data.get("pw"): 
+            update_data['pw']=get_password_hash(update_data["pw"])
+        # 수정 정보 중에 pw 데이터가 있는지 물어 보고 있으면 암호화(완료)
+        
         update_user=await UserCrud.cr_us_update(db,user_id,update_data)
-        if update_user:
-            await db.commit()
-            await db.refresh(update_user)
+        
+        if not update_user:
+            raise HTTPException(status_code=404, detail="수정할 사용자가 없습니다")
+        
+        
+        await db.commit()
+        await db.refresh(update_user)
 
         return update_user
     
-    # se_us_update
-    # "if "pw" in update_data and update_data["pw"] is not None:
-    # 수정 정보 중에 pw 데이터가 있는지 물어 보고 있으면 암호화
-    # if update_data.get("pw"): 
+    
+    
+   
 
     
     @staticmethod
     async def se_us_logout(db: AsyncSession, user_id: int) -> bool:
-        logout=await UserCrud.cr_us_update_token(db,user_id,None)
-        if logout:             
-            await db.commit()
-            return True
         
-        return False
+        return True
+    # 로그아웃 부분은 db를 건드릴 필요가 없음(완료)
     
-    # se_us_logout
-    # 로그아웃 부분은 db를 건드릴 필요가 없음
+    
     
     @staticmethod
     async def se_us_get_id(db: AsyncSession, user_id: int):
-        return await UserCrud.cr_us_get_id(db, user_id)
+        user = await UserCrud.cr_us_get_id(db, user_id)
+        if not user:
+            raise HTTPException(status_code=404,detail='해당 id의 사용자가 없습니다')
+        
+        return user
     
     @staticmethod
     async def se_us_delete(db: AsyncSession, user_id: int) -> bool:
+        try: 
+            delete_user = await UserCrud.cr_us_delete(db, user_id)
         
-        delete_user = await UserCrud.cr_us_delete(db, user_id)
-        
-        if delete_user:
+            if not delete_user:
+                raise HTTPException(status_code=404, detail='삭제할 유저가 없습니다')
+
             await db.commit()
             return True
-        return False
-    
+        except Exception as e:
+            await db.rollback() # 삭제 실패시 rollback(완료)
+            raise e
+        # 유저 삭제 실패 예외처리(완료)
 
-    # se_us_delete
-    # 유저 삭제 실패 예외처리
-    # 삭제 실패시 rollback
+   
+   
