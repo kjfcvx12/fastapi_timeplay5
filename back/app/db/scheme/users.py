@@ -21,7 +21,6 @@ class UserLogin(BaseModel):
     pw: Annotated[str, Field(max_length=72)]
 
 class UserUpdate(BaseModel):
-    email: EmailStr | None = None
     pw: Annotated[str, Field(max_length=72, default=None)] 
     user_name: str | None = None    
     address: str | None = None

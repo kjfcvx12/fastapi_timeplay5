@@ -24,6 +24,8 @@ app=FastAPI(lifespan=lifespan)
 app.add_middleware(RefreshTokenMiddleware)
 
 
+app.post('/')
+
 app.include_router(users.router)
 app.include_router(products.router)
 app.include_router(carts.router)

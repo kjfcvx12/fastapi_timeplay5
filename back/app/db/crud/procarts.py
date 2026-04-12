@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
+from sqlalchemy.orm import selectinload
 
 from app.db.models.procarts import ProCart
 from app.db.models.products import Product
@@ -20,45 +21,47 @@ class PrCartCrud:
     
     @staticmethod
     async def cr_prcart_get_all(db:AsyncSession, cart_id: int) -> list[ProCart]:
-        result=await db.execute(select(ProCart).filter(ProCart.cart_id==cart_id))
+        result = await db.execute(
+            select(ProCart)
+            .filter(ProCart.cart_id == cart_id)
+            .options(selectinload(ProCart.product)) 
+        )
         return result.scalars().all()
     
 
     @staticmethod
-    async def cr_prcart_get_id(db:AsyncSession, pro_id:int, cart_id:int) -> ProCart:
-        query = select(ProCart).filter(
-            ProCart.pro_id == pro_id,
-            ProCart.cart_id == cart_id)
-    
-        result = await db.execute(query)
+    async def cr_prcart_get_id(db:AsyncSession, pro_id:int, cart_id:int) -> ProCart:    
+        result = await db.execute(
+            select(ProCart)
+            .filter(ProCart.pro_id == pro_id, ProCart.cart_id == cart_id)
+            .options(selectinload(ProCart.product)))
     
         return result.scalars().one_or_none()
     
 
     @staticmethod
     async def cr_prcart_get_name(db:AsyncSession, cart_id:int, pro_name:str) -> list[ProCart]:
-        query = (select(ProCart).join(Product).filter(
-            ProCart.cart_id == cart_id,
-            Product.pro_name.contains(pro_name)))
-        
-        result = await db.execute(query)
+        result = await db.execute(
+           select(ProCart).join(Product)
+           .filter(ProCart.cart_id == cart_id, Product.pro_name.contains(pro_name))
+           .options(selectinload(ProCart.product)))
 
         return result.scalars().all()
 
 
     @staticmethod
     async def cr_prcart_get_pro_id(db:AsyncSession, pro_id:int, cart_id:int) ->  Optional[ProCart]:
-        db_prcart = select(ProCart).filter(
-            ProCart.pro_id == pro_id,
-            ProCart.cart_id == cart_id)
-    
-        result = await db.execute(db_prcart)
+        result = await db.execute(
+            select(ProCart)
+            .filter(ProCart.pro_id == pro_id, ProCart.cart_id == cart_id)
+            .options(selectinload(ProCart.product)))
     
         return result.scalars().one_or_none()
     
+
     @staticmethod
     async def cr_prcart_update_qty(db: AsyncSession, pro_cart_id: int, qty: int) -> ProCart:
-        db_prcart = await db.get(ProCart, pro_cart_id)
+        db_prcart = await db.get(ProCart, pro_cart_id, options=[selectinload(ProCart.product)])
         if db_prcart:
             db_prcart.qty = qty
             await db.flush()
@@ -77,7 +80,7 @@ class PrCartCrud:
     async def cr_prcart_update_by_id(db:AsyncSession, prcart:PrCartUpdate, 
                                      pro_cart_id:int) -> ProCart | None:
         
-        prcart_data=await db.get(ProCart, pro_cart_id)
+        prcart_data=await db.get(ProCart, pro_cart_id, options=[selectinload(ProCart.product)])
         if prcart_data:
             update_data=prcart.model_dump(exclude_unset=True)
             for key, Value in update_data.items():

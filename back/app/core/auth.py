@@ -45,7 +45,7 @@ async def get_user_id(request:Request)-> int:
     try:
         user_id=verify_token(access_token)
         if user_id is None:
-            raise HTTPException(status_code=401,detail="no uid")
+            raise HTTPException(status_code=401,detail="현재 사용자가 없습니다.")
         return user_id
 
     except ExpiredSignatureError:

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.db.scheme.orders import OrRead
-from app.db.scheme.orders import OrCreate, OrRead, OrUpdate
+from app.db.scheme.orders import OrCreate, OrRead, OrUpdate, OrCreateRequest
 
 from app.db.scheme.orderdetails import OrDeRead, OrDeCreate
 
@@ -47,12 +47,11 @@ async def ro_or_get_date(ordered_at:datetime,
 
 # 주문 생성 order
 @router.post("/create", response_model=OrRead)
-async def ro_or_create(prcart:list,
-                       order:OrCreate,
+async def ro_or_create(order_rq:OrCreateRequest,
                        user_id:int=Depends(get_user_id),
                        db:AsyncSession=Depends(get_db)):
 
-    return await OrService.se_order_create(db, order, prcart)
+    return await OrService.se_order_create(db, order_rq.order, order_rq.prcart)
 
 # 주문 수정 상태 수정 order
 @router.put("/update", response_model=OrRead)

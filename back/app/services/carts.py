@@ -4,7 +4,8 @@ from fastapi import HTTPException
 
 from app.db.crud.procarts import PrCartCrud, PrCartUpdate, PrCartCreate
 
-from app.db.models.procarts import ProCart 
+from app.db.models.procarts import ProCart
+from app.db.models.products import Product
 
 from typing import Optional
 
@@ -67,13 +68,13 @@ class CartService:
                 new_qty = pro.qty + prcart.qty
                 result=await PrCartCrud.cr_prcart_update_qty(db, pro.pro_cart_id, new_qty)
                 await db.commit()
-                await db.refresh(result)
+                await db.refresh(result, attribute_names=["product"])
                 return result
             else:
                 result=await PrCartCrud.cr_prcart_create(db, prcart)
             
             await db.commit()
-            await db.refresh(result)
+            await db.refresh(result, attribute_names=["product"])
 
             return result
         
@@ -99,7 +100,7 @@ class CartService:
                                 detail="장바구니에 찾으시는 이름의 상품은 없습니다.")
             
             await db.commit()
-            await db.refresh(db_prcart)
+            await db.refresh(db_prcart, attribute_names=["product"])
             
             return db_prcart
         

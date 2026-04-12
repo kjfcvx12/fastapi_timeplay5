@@ -13,6 +13,14 @@ class OrCreate(BaseModel):
     user_id: int
     pay: int
 
+class CartPro(BaseModel):
+    pro_id: int
+    qty: int
+
+class OrCreateRequest(BaseModel):
+    order: OrCreate
+    prcart: List[CartPro]
+
 class OrUpdate(BaseModel):
     order_state: Optional[int]=Field(None, ge=0, le=4)
 
