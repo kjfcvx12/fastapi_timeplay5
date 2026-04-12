@@ -5,7 +5,8 @@ from fastapi.concurrency import asynccontextmanager
 from dotenv import load_dotenv
 
 from app.db.database import Base, async_engine
-from app.routers import products , reviews, users
+from app.db import models
+from app.routers import users, products, carts, orders, reviews 
 from app.middleware.token_refresh import RefreshTokenMiddleware
 
 load_dotenv(dotenv_path=".env")
@@ -25,8 +26,8 @@ app=FastAPI(lifespan=lifespan)
 
 app.include_router(users.router)
 app.include_router(products.router)
-# app.include_router(cart.router)
-# app.include_router(order.router)
+app.include_router(carts.router)
+app.include_router(orders.router)
 app.include_router(reviews.router)
 
 

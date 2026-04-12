@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from orderdetails import OrDeRead
+from app.db.scheme.orderdetails import OrDeRead
 
 class OrBase(BaseModel):
     total : int=Field(..., ge=0)

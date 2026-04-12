@@ -17,7 +17,7 @@ class Review(Base):
     content: Mapped[str] =mapped_column(String(500), nullable=False)
     rating : Mapped[int] =mapped_column(nullable=False)
     
-    pro_id: Mapped[int]= mapped_column(ForeignKey("products.pro_id"), nullable=False, ondelete="CASCADE")
+    pro_id: Mapped[int]= mapped_column(ForeignKey("products.pro_id", ondelete="CASCADE"), nullable=False)
     user_id: Mapped[int]= mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     od_id: Mapped[int]= mapped_column(ForeignKey("orderdetails.od_id", ondelete="CASCADE"), nullable=False, unique=True)
     

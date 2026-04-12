@@ -1,29 +1,29 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime,timezone
 from typing import Annotated
 
 
 class Userbase(BaseModel):
     user_name: str
-    email: str
+    email: EmailStr
     address: str
     phone: str
     
 class UserCreate(BaseModel):
     user_name: str
-    email: str
+    email: EmailStr
     pw: Annotated[str, Field(max_length=72)]
     address: str
     phone: str
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     pw: Annotated[str, Field(max_length=72)]
 
 class UserUpdate(BaseModel):
-    email: str | None = None
-    user_name: str | None = None
+    email: EmailStr | None = None
     pw: Annotated[str, Field(max_length=72, default=None)] 
+    user_name: str | None = None    
     address: str | None = None
     phone: str | None = None
 

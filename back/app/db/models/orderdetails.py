@@ -22,5 +22,5 @@ class OrderDetail(Base):
     
     order: Mapped["Order"] = relationship(back_populates="orderdetails")
     product: Mapped["Product"] = relationship(back_populates="orderdetails")
-    review: Mapped["Review"] = relationship(back_populates="orderdetails")
+    review: Mapped["Review"] = relationship(back_populates="orderdetail")
     
