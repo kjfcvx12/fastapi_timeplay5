@@ -17,15 +17,13 @@ class UserService:
         
         hashed_pw = get_password_hash(user.pw)
         new_user = await UserCrud.cr_us_create(db, user, hashed_pw)
-
-        cart={'user_id':user.user_id}
-        db_cart=await CaCrud.cr_ca_create(db, cart)
+        
+        db_cart=await CaCrud.cr_ca_create(db, user_id=new_user.user_id)
         await db.commit()
-        await db.refresh(new_user,db_cart)
+        await db.refresh(new_user)
+        await db.refresh(db_cart)
         return new_user
-    
-    
-    
+       
     
     @staticmethod
     async def se_us_login(db: AsyncSession, login_data: UserLogin):
@@ -53,7 +51,9 @@ class UserService:
             update_data['pw']=get_password_hash(update_data["pw"])
         # 수정 정보 중에 pw 데이터가 있는지 물어 보고 있으면 암호화(완료)
         
-        update_user=await UserCrud.cr_us_update(db,user_id,update_data)
+        updated_model = UserUpdate(**update_data) 
+
+        update_user=await UserCrud.cr_us_update(db,user_id,updated_model)
         
         if not update_user:
             raise HTTPException(status_code=404, detail="수정할 사용자가 없습니다")
@@ -64,10 +64,6 @@ class UserService:
 
         return update_user
     
-    
-    
-   
-
     
     @staticmethod
     async def se_us_get_id(db: AsyncSession, user_id: int):
@@ -89,10 +85,6 @@ class UserService:
             await db.commit()
             return True
         except Exception as e:
-            await db.rollback() # 삭제 실패시 rollback(완료)
+            await db.rollback()
             raise HTTPException(status_code=404, detail=f"사용자 삭제 실패 :{e}")
     
-
-    # se_us_delete
-    # 유저 삭제 실패 예외처리
-    # 삭제 실패시 rollback

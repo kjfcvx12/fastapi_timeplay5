@@ -22,7 +22,7 @@ async def signup(user:UserCreate, db:AsyncSession=Depends(get_db)):
 
 
 # 로그인
-@router.post("/login", response_model=UserRead)
+@router.post("/login")
 async def login(user:UserLogin, response:Response, db:AsyncSession=Depends(get_db)):
     result=await UserService.se_us_login(db, user)
     db_user, access_token, refresh_token=result
@@ -30,7 +30,7 @@ async def login(user:UserLogin, response:Response, db:AsyncSession=Depends(get_d
     return {"message": "로그인 성공"}
 
 # 로그아웃
-@router.post("/logout", response_model=bool)
+@router.post("/logout")
 async def logout(response:Response):
     response.delete_cookie(key="access_token")
     response.delete_cookie(key="refresh_token")
@@ -44,12 +44,15 @@ async def get_user_id(user_id: int, db: AsyncSession = Depends(get_db)):
 
 
 # PUT		/users/edit/{user_id}	특정 id 사용자 수정
-@router.put("/edit/{user_id}", response_model=UserRead)
-async def update_user_id(user_update: UserUpdate, user_id: int = Depends(get_user_id),  db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme)):
+@router.put("/edit", response_model=UserRead)
+async def update_user_id(user_update: UserUpdate, 
+                         user_id: int = Depends(get_user_id),  
+                         db: AsyncSession = Depends(get_db)):
     return await UserService.se_us_update(db, user_id, user_update)
 
 
 # DELETE		/users/del/{user_id}	특정 id 사용자 삭제
-@router.delete("/del/{user_id}", response_model=UserRead, status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user_id(user_id:int=Depends(get_user_id), db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme),):
+@router.delete("/del", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user_id(user_id:int=Depends(get_user_id),
+                         db: AsyncSession = Depends(get_db)):
     await UserService.se_us_delete(db,user_id)

@@ -34,8 +34,12 @@ class UserCrud:
         db_user=await db.get(User, user_id)
         
         if db_user:           
-            for key,value in user.items():
-                setattr(db_user,key,value)
+        
+            update_user= user.model_dump(exclude_unset=True)
+
+            for key, value in update_user.items():
+                setattr(db_user, key, value)
+
             await db.flush()
             return db_user
             
