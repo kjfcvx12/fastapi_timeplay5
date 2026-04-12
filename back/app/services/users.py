@@ -1,7 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from app.db.crud.users import UserCrud
+from app.db.crud.carts import CaCrud
+
 from app.db.scheme.users import UserCreate, UserUpdate, UserLogin
+
 from app.core.jwt_handle import get_password_hash, verify_password, create_access_token, create_refresh_token
 
 class UserService:
@@ -11,12 +14,14 @@ class UserService:
 
         if already_user:
             raise HTTPException(status_code=400, detail='이미 등록된 이메일 입니다.')
-        # 동일한 이메일을 가진 유저가 있을 경우 접속을 막기위한 에러처리(완료)
         
         hashed_pw = get_password_hash(user.pw)
         new_user = await UserCrud.cr_us_create(db, user, hashed_pw)
+
+        cart={'user_id':user.user_id}
+        db_cart=await CaCrud.cr_ca_create(db, cart)
         await db.commit()
-        await db.refresh(new_user)
+        await db.refresh(new_user,db_cart)
         return new_user
     
     
@@ -34,14 +39,11 @@ class UserService:
         access_token = create_access_token(uid=user.user_id,**token_data)
         refresh_token = create_refresh_token(uid=user.user_id)
         
-        await UserCrud.cr_us_update_token(db, user.user_id, refresh_token)
+        update_user=await UserCrud.cr_us_update_token(db, user.user_id, refresh_token)
+        
         await db.commit()
-        return {
-            "access_token": access_token,
-            "refresh_token":refresh_token,
-            "token_type": "bearer",
-            "user": user
-        }
+        await db.refresh(update_user)
+        return update_user, access_token, refresh_token
     
     @staticmethod
     async def se_us_update(db:AsyncSession,user_id:int, user_update:UserUpdate):
@@ -68,14 +70,6 @@ class UserService:
 
     
     @staticmethod
-    async def se_us_logout(db: AsyncSession, user_id: int) -> bool:
-        
-        return True
-    # 로그아웃 부분은 db를 건드릴 필요가 없음(완료)
-    
-    
-    
-    @staticmethod
     async def se_us_get_id(db: AsyncSession, user_id: int):
         user = await UserCrud.cr_us_get_id(db, user_id)
         if not user:
@@ -83,6 +77,7 @@ class UserService:
         
         return user
     
+
     @staticmethod
     async def se_us_delete(db: AsyncSession, user_id: int) -> bool:
         try: 
@@ -95,8 +90,9 @@ class UserService:
             return True
         except Exception as e:
             await db.rollback() # 삭제 실패시 rollback(완료)
-            raise e
-        # 유저 삭제 실패 예외처리(완료)
+            raise HTTPException(status_code=404, detail=f"사용자 삭제 실패 :{e}")
+    
 
-   
-   
+    # se_us_delete
+    # 유저 삭제 실패 예외처리
+    # 삭제 실패시 rollback

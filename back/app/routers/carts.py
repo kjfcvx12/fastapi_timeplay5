@@ -36,14 +36,14 @@ async def ro_prcart_get_name(pro_name:str,
     return await CartService.se_cart_get_name(db, user_id, pro_name)
 
 # 장바구니 상품 추가
-@router.post("", response_model=PrCartRead, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=PrCartRead, status_code=status.HTTP_201_CREATED)
 async def ro_prcart_create(prcart:PrCartCreate,
                        user_id:int=Depends(get_user_id),
                        db:AsyncSession=Depends(get_db)):
     return await CartService.se_add_or_update(db, user_id, prcart)
 
 # 장바구니 상품 수정
-@router.put("/{pro_cart_id}", response_model=PrCartRead, status_code=status.HTTP_200_OK)
+@router.put("/edit/{pro_cart_id}", response_model=PrCartRead, status_code=status.HTTP_200_OK)
 async def ro_prcart_update(prcart:PrCartUpdate,
                            pro_cart_id: int,
                            user_id:int=Depends(get_user_id),
@@ -51,7 +51,7 @@ async def ro_prcart_update(prcart:PrCartUpdate,
     return await CartService.se_prcart_update(db, prcart, pro_cart_id)
 
 # 장바구니 상품 삭제
-@router.delete("/{pro_cart_id}", status_code=status.HTTP_200_OK)
+@router.delete("/del/{pro_cart_id}", status_code=status.HTTP_200_OK)
 async def ro_prcart_delete(pro_cart_id:int,
                            user_id:int=Depends(get_user_id),
                            db:AsyncSession=Depends(get_db)):
@@ -59,7 +59,7 @@ async def ro_prcart_delete(pro_cart_id:int,
     return {"detail": "상품이 삭제되었습니다."}
 
 # 장바구니 상품 전체 삭제
-@router.delete("/", status_code=status.HTTP_200_OK)
+@router.delete("/del_all", status_code=status.HTTP_200_OK)
 async def ro_prcart_delete_all(user_id:int=Depends(get_user_id),
                        db:AsyncSession=Depends(get_db)):
     await CartService.se_prcart_delete_all(db, user_id)
