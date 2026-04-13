@@ -1,7 +1,7 @@
 from app.db.database import Base
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, TIMESTAMP, func, ForeignKey
+from sqlalchemy import String, TIMESTAMP, func, ForeignKey, DateTime
 
 from datetime import datetime
 
@@ -17,7 +17,7 @@ class Order(Base):
     __tablename__="orders"
 
     order_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    ordered_at: Mapped[Optional[datetime]]= mapped_column(TIMESTAMP, server_default=func.now(), nullable=True)
+    ordered_at: Mapped[Optional[datetime]]= mapped_column(DateTime, server_default=func.now(), nullable=True)
     total: Mapped[int] =mapped_column(nullable=False)
     pay: Mapped[int] =mapped_column(nullable=False)
     order_state: Mapped[int] =mapped_column(nullable=False, default=0)

@@ -20,8 +20,10 @@ class OdCrud:
         return result.scalars().all()
     
     @staticmethod
-    async def cr_od_get_id(db:AsyncSession, order_id:int) -> OrderDetail | None:
-        return await db.get(OrderDetail, order_id)
+    async def cr_od_get_id(db:AsyncSession, od_id:int) -> OrderDetail | None:
+        result=await db.execute(select(OrderDetail)
+                                .filter(OrderDetail.od_id==od_id))
+        return result.scalar_one_or_none()
 
     
     # 주문 상세 생성 장바구니에서 선택한 상품으로 주문 생성

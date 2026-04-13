@@ -3,17 +3,18 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.db.scheme.orders import OrRead
-from app.db.scheme.orders import OrCreate, OrRead, OrUpdate, OrCreateRequest
+from app.db.scheme.orders import OrCreate, OrRead, OrUpdate
 
 from app.db.scheme.orderdetails import OrDeRead, OrDeCreate
 
+from app.db.scheme.procarts import PrCartRead
 
 from app.core.auth import get_user_id, get_admin_id
 
 from app.services.orders import OrService
+from app.services.carts import CartService
 
-from datetime import datetime
+from datetime import date
 
 
 router=APIRouter(prefix="/order", tags=["order"])
@@ -37,8 +38,8 @@ async def ro_or_get_user_id(user_id:int,
 
 
 # 주문 조회 날짜 order,od
-@router.get("/date/{ordered_at}", response_model=list[OrRead])
-async def ro_or_get_date(ordered_at:datetime,
+@router.get("/date", response_model=list[OrRead])
+async def ro_or_get_date(ordered_at:date,
                        admin_id:int=Depends(get_admin_id),
                        db:AsyncSession=Depends(get_db)):
 
@@ -46,15 +47,15 @@ async def ro_or_get_date(ordered_at:datetime,
 
 
 # 주문 생성 order
-@router.post("/create", response_model=OrRead)
-async def ro_or_create(order_rq:OrCreateRequest,
+@router.post("/create", response_model=OrRead, status_code=status.HTTP_201_CREATED)
+async def ro_or_create(order:OrCreate,
                        user_id:int=Depends(get_user_id),
                        db:AsyncSession=Depends(get_db)):
-
-    return await OrService.se_order_create(db, order_rq.order, order_rq.prcart)
+    prcart = await CartService.se_cart_get_all(db, user_id)
+    return await OrService.se_order_create(db, order, prcart, user_id)
 
 # 주문 수정 상태 수정 order
-@router.put("/update", response_model=OrRead)
+@router.put("/update/{order_id}", response_model=OrRead)
 async def ro_or_update(order:OrUpdate,
                        order_id:int,
                        admin_id:int=Depends(get_admin_id),
@@ -68,7 +69,7 @@ async def ro_or_cancel(order_id:int,
                        user_id:int=Depends(get_user_id),
                        db:AsyncSession=Depends(get_db)):
 
-    return await OrService.se_order_cancel(db, order_id)
+    return await OrService.se_order_cancel(db, order_id, user_id)
 
 # 주문 조회 주문 id od
 @router.get("/detail/{order_id}", response_model=list[OrDeRead])
@@ -76,4 +77,4 @@ async def ro_or_get_order_id(order_id:int,
                        user_id:int=Depends(get_user_id),
                        db:AsyncSession=Depends(get_db)):
 
-    return await OrService.se_order_get_od_id(db, order_id)
+    return await OrService.se_order_get_order_id(db, order_id, user_id)

@@ -10,7 +10,7 @@ from app.db.models.products import Product
 
 from app.db.scheme.orders import OrRead, OrCreate, OrUpdate
 from app.db.scheme.orderdetails import OrDeRead, OrDeCreate 
-from app.db.scheme.products import PrUpdate
+from app.db.scheme.procarts import PrCartRead
 
 from app.db.crud.orders import OrderCrud
 from app.db.crud.orderdetails import OdCrud
@@ -18,8 +18,6 @@ from app.db.crud.procarts import PrCartCrud
 from app.db.crud.products import PrCrud
 
 from datetime import datetime
-
-from typing import Optional
 
 
 class OrService:
@@ -58,43 +56,54 @@ class OrService:
 
     # 주문 생성 order
     @staticmethod
-    async def se_order_create(db:AsyncSession, order:OrCreate, prcart:list) -> Order:
+    async def se_order_create(db:AsyncSession, order:OrCreate, prcart:list[PrCartRead], user_id:int) -> Order:
+        # try:
+            if not isinstance(prcart, list):
+                prcart = [prcart]
 
-        try:
-
-            db_order=await OrderCrud.cr_pr_create(db, order)
+            order_data=order.model_dump(exclude={'pro', 'user_id','total'})
+            order_data['user_id']=user_id
+            order_data['total'] = 0
+            db_order=await OrderCrud.cr_or_create(db, order_data)
             
+            total=0
             for i in prcart:
                 
-                db_pro=await PrCrud.cr_pr_get_by_id(db,i.pro_id)
+                db_pro=await PrCrud.cr_pr_get_by_id(db, i.pro_id)
                 
                 if not db_pro or db_pro.qty < i.qty:
                     raise HTTPException(status_code=400, 
                                         detail=f"상품{i.pro_id} 재고가 부족합니다.")
+                
+                od_data = {"order_id": db_order.order_id, 
+                           "pro_id": i.pro_id, 
+                           "qty": i.qty, 
+                           "price": db_pro.price}
+                await OdCrud.cr_od_create(db, OrDeCreate(**od_data))
+                new_total=i.qty*db_pro.price
+                total+=new_total
+                
+                await PrCrud.cr_pr_update_qty(db, pro_id=i.pro_id, eqty=i.qty)
 
-                data = i.model_dump()
-                data['order_id'] = db_order.order_id
-                await OdCrud.cr_od_create(db,OrDeCreate(**data))
-
-                  
-                db_product=await PrCrud.cr_pr_update_qty(db, pro_id=i.pro_id, eqty=i.qty)
-
-                db_prcart=await PrCartCrud.cr_prcart_delete_by_id(db, i, i.pro_id)
-
+                await PrCartCrud.cr_prcart_delete_by_id(db, i.pro_cart_id)
+                
+            
+            update_data={"total": total}
+            await OrderCrud.cr_or_update_by_id(db, update_data, db_order.order_id)
 
             await db.commit()
-            await db.refresh(db_order)
-
+            await db.refresh(db_order, ['orderdetails'])
             return db_order
 
-        except HTTPException:
-            await db.rollback()
-            raise
+
+        # except HTTPException:
+        #     await db.rollback()
+        #     raise
         
-        except Exception as e:
-            await db.rollback()
-            raise HTTPException(status_code=500, 
-                                detail=f"주문 실패: {str(e)}")
+        # except Exception as e:
+        #     await db.rollback()
+        #     raise HTTPException(status_code=500, 
+        #                         detail=f"주문 실패: {str(e)}")
     
     
     # 주문 수정 상태 수정 관리자 order
@@ -119,12 +128,20 @@ class OrService:
 
     # 주문 취소 order
     @staticmethod
-    async def se_order_cancel(db: AsyncSession, order_id: int) -> Order:
+    async def se_order_cancel(db: AsyncSession, order_id: int, user_id:int) -> Order:
         try:
+            db_user=await OrderCrud.cr_or_get_id(db,user_id)
+
+            if not db_user:
+                raise HTTPException(status_code=404, detail="해당 사용자의 주문이 없습니다.")
 
             db_order=await OrderCrud.cr_or_get_order_id(db, order_id)
+
             if not db_order:
                 raise HTTPException(status_code=404, detail="주문 정보를 찾을 수 없습니다.")
+            
+            if db_order.user_id != user_id:
+                raise HTTPException(status_code=403, detail="본인의 주문만 취소할 수 있습니다.")
                 
             od=await OdCrud.cr_od_get_id_all(db, order_id)
             
@@ -132,20 +149,30 @@ class OrService:
                 await PrCrud.cr_pr_update_qty(db, pro_id=i.pro_id, eqty=-i.qty) 
 
             update_data = {"order_state": 4} 
-            await OrderCrud.cr_or_update_by_id(db, order_id, update_data)
+            await OrderCrud.cr_or_update_by_id(db, update_data, order_id)
 
             await db.commit()
             await db.refresh(db_order)
             return db_order
+        
+        except HTTPException:
+            await db.rollback()
+            raise
 
         except Exception as e:
             await db.rollback()
             raise HTTPException(status_code=500, detail=f"주문 취소 실패: {str(e)}")
 
 
-    # 주문 조회 주문 id od
+    # 주문 조회 주문 id order_id
     @staticmethod
-    async def se_order_get_od_id(db:AsyncSession, order_id:int)->list[OrderDetail]:
+    async def se_order_get_order_id(db:AsyncSession, order_id:int, user_id:int)->list[OrderDetail]:
+        
+        db_user=await OrderCrud.cr_or_get_id(db,user_id)
+
+        if not db_user:
+            raise HTTPException(status_code=404, detail="사용자가 일치 하지 않습니다.")
+
         db_od=await OdCrud.cr_od_get_id_all(db, order_id)
 
         if not db_od:

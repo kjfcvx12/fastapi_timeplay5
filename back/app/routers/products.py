@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Response, status
-from fastapi.security import OAuth2PasswordBearer
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +11,6 @@ from app.core.auth import get_admin_id, get_user_id
 
 router=APIRouter(prefix="/product", tags=["Product"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login", auto_error=False)
 
 # 상품 전체 검색
 @router.get("/all", response_model=list[PrRead])

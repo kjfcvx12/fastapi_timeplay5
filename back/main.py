@@ -24,7 +24,9 @@ app=FastAPI(lifespan=lifespan)
 app.add_middleware(RefreshTokenMiddleware)
 
 
-app.post('/')
+@app.get("/")
+async def root():
+    return {"message": "쇼핑몰"}
 
 app.include_router(users.router)
 app.include_router(products.router)
